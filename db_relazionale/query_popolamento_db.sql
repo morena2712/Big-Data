@@ -85,12 +85,12 @@ SELECT
 FROM (
     SELECT @p := @p + 1 AS n
     FROM information_schema.columns, (SELECT @p := 0) r
-    LIMIT 320
+    LIMIT 365
 ) AS seq
 JOIN (
     SELECT hotel_codice, numero, id_tipologia
     FROM Camera
     ORDER BY RAND()
-    LIMIT 450
 ) AS c
-ON 1=1;
+ON 1=1
+LIMIT 450;
