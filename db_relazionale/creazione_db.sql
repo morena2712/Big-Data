@@ -49,7 +49,6 @@ CREATE TABLE Cliente (
     email       VARCHAR(100) UNIQUE NOT NULL
 );
 
-
 -- 5. Creazione entità PRENOTAZIONE 
 CREATE TABLE Prenotazione (
     id_prenotazione          VARCHAR(20) PRIMARY KEY,
