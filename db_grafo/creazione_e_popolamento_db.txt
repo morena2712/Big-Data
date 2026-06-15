@@ -1,0 +1,395 @@
+//Creazione dei vincoli
+
+CREATE CONSTRAINT unique_author_email IF NOT EXISTS
+FOR (a:Author) REQUIRE a.email IS UNIQUE;
+
+CREATE CONSTRAINT unique_article_doi IF NOT EXISTS
+FOR (ar:Article) REQUIRE ar.doi IS UNIQUE;
+
+CREATE CONSTRAINT unique_topic_name IF NOT EXISTS
+FOR (t:Topic) REQUIRE t.name IS UNIQUE;
+
+CREATE CONSTRAINT unique_venue_name IF NOT EXISTS
+FOR (v:Venue) REQUIRE v.name IS UNIQUE;
+
+CREATE CONSTRAINT unique_affiliation_name IF NOT EXISTS
+FOR (af:Affiliation) REQUIRE af.name IS UNIQUE;
+
+CREATE CONSTRAINT exists_author_email IF NOT EXISTS
+FOR (a:Author) REQUIRE a.email IS NOT NULL;
+
+CREATE CONSTRAINT exists_article_doi IF NOT EXISTS
+FOR (ar:Article) REQUIRE ar.doi IS NOT NULL;
+
+CREATE CONSTRAINT exists_article_title IF NOT EXISTS
+FOR (ar:Article) REQUIRE ar.title IS NOT NULL;
+
+
+// Creazione dei Topic
+
+CREATE (:Topic {name:'Machine Learning', description:'Studio di algoritmi che migliorano automaticamente attraverso l\'esperienza'});
+
+CREATE (:Topic {name:'Deep Learning', description:'Reti neurali con molteplici livelli di astrazione'});
+
+CREATE (:Topic {name:'Natural Language Processing', description:'Elaborazione e comprensione del linguaggio naturale'});
+
+CREATE (:Topic {name:'Computer Vision', description:'Analisi e interpretazione di immagini e video'});
+
+CREATE (:Topic {name:'Bioinformatics', description:'Applicazione di metodi computazionali a dati biologici'});
+
+CREATE (:Topic {name:'Database Systems', description:'Progettazione e ottimizzazione di sistemi di gestione dati'});
+
+CREATE (:Topic {name:'Graph Databases', description:'Database basati su strutture a grafo'});
+
+CREATE (:Topic {name:'Reinforcement Learning', description:'Apprendimento tramite interazione con l\'ambiente'});
+
+CREATE (:Topic {name:'Genomics', description:'Studio del genoma e delle sue funzioni'});
+
+CREATE (:Topic {name:'Data Mining', description:'Estrazione di pattern da grandi dataset'});
+
+
+// Creazione delle Venue
+
+CREATE (:Venue {name:'NeurIPS', fullName:'Conference on Neural Information Processing Systems', type:'Conference', impactFactor:4.5});
+
+CREATE (:Venue {name:'ICML', fullName:'International Conference on Machine Learning', type:'Conference', impactFactor:4.3});
+
+CREATE (:Venue {name:'CVPR', fullName:'Conference on Computer Vision and Pattern Recognition', type:'Conference', impactFactor:4.7});
+
+CREATE (:Venue {name:'ACL', fullName:'Annual Meeting of the Association for Computational Linguistics', type:'Conference', impactFactor:3.9});
+
+CREATE (:Venue {name:'VLDB', fullName:'Very Large Data Bases Conference', type:'Conference', impactFactor:3.8});
+
+CREATE (:Venue {name:'Nature Methods', fullName:'Nature Methods', type:'Journal', impactFactor:48.0});
+
+CREATE (:Venue {name:'Bioinformatics', fullName:'Bioinformatics Oxford Journal', type:'Journal', impactFactor:6.9});
+
+CREATE (:Venue {name:'SIGMOD', fullName:'ACM SIGMOD Conference', type:'Conference', impactFactor:4.1});
+
+CREATE (:Venue {name:'ICLR', fullName:'International Conference on Learning Representations', type:'Conference', impactFactor:4.6});
+
+CREATE (:Venue {name:'AAAI', fullName:'AAAI Conference on Artificial Intelligence', type:'Conference', impactFactor:3.7});
+
+
+// Creazione di Affiliation
+
+CREATE (:Affiliation {name:'Politecnico di Milano'});
+
+CREATE (:Affiliation {name:'Università di Bologna'});
+
+CREATE (:Affiliation {name:'Sapienza Università di Roma'});
+
+CREATE (:Affiliation {name:'Università del Salento'});
+
+CREATE (:Affiliation {name:'Università di Padova'});
+
+CREATE (:Affiliation {name:'Politecnico di Torino'});
+
+CREATE (:Affiliation {name:'Università di Napoli Federico II'});
+
+CREATE (:Affiliation {name:'Università degli Studi di Milano'});
+
+CREATE (:Affiliation {name:'Università di Pisa'});
+
+CREATE (:Affiliation {name:'Università di Firenze'});
+
+
+// Creazione di Autore e relazione AFFILIATED_WITH
+
+MATCH (af1:Affiliation {name:'Politecnico di Milano'})
+CREATE (a1:Author {
+    firstName:'Marco', surname:'Rossi', email:'marco.rossi@polimi.it',
+    researchArea:'Machine Learning', hIndex:42
+})-[:AFFILIATED_WITH]->(af1);
+
+MATCH (af2:Affiliation {name:'Università di Bologna'})
+CREATE (a2:Author {
+    firstName:'Giulia', surname:'Bianchi', email:'giulia.bianchi@unibo.it',
+    researchArea:'Natural Language Processing', hIndex:35
+})-[:AFFILIATED_WITH]->(af2);
+
+MATCH (af3:Affiliation {name:'Sapienza Università di Roma'})
+CREATE (a3:Author {
+    firstName:'Alessandro', surname:'Conti', email:'alessandro.conti@uniroma1.it',
+    researchArea:'Computer Vision', hIndex:28
+})-[:AFFILIATED_WITH]->(af3);
+
+MATCH (af4:Affiliation {name:'Università del Salento'})
+CREATE (a4:Author {
+    firstName:'Elena', surname:'Ferrari', email:'elena.ferrari@unitn.it',
+    researchArea:'Bioinformatics', hIndex:51
+})-[:AFFILIATED_WITH]->(af4);
+
+MATCH (af5:Affiliation {name:'Università di Padova'})
+CREATE (a5:Author {
+    firstName:'Luca', surname:'Moretti', email:'luca.moretti@unipd.it',
+    researchArea:'Database Systems', hIndex:38
+})-[:AFFILIATED_WITH]->(af5);
+
+MATCH (af6:Affiliation {name:'Politecnico di Torino'})
+CREATE (a6:Author {
+    firstName:'Sofia', surname:'Ricci', email:'sofia.ricci@polito.it',
+    researchArea:'Deep Learning', hIndex:31
+})-[:AFFILIATED_WITH]->(af6);
+
+MATCH (af7:Affiliation {name:'Università di Napoli Federico II'})
+CREATE (a7:Author {
+    firstName:'Francesco', surname:'Greco', email:'francesco.greco@unina.it',
+    researchArea:'Data Mining', hIndex:25
+})-[:AFFILIATED_WITH]->(af7);
+
+MATCH (af8:Affiliation {name:'Università degli Studi di Milano'})
+CREATE (a8:Author {
+    firstName:'Chiara', surname:'Lombardi', email:'chiara.lombardi@unimi.it',
+    researchArea:'Bioinformatics', hIndex:44
+})-[:AFFILIATED_WITH]->(af8);
+
+MATCH (af4:Affiliation {name:'Università del Salento'})
+CREATE (a9:Author {
+    firstName:'Andrea', surname:'Martini', email:'andrea.martini@sns.it',
+    researchArea:'Reinforcement Learning', hIndex:29
+})-[:AFFILIATED_WITH]->(af4);
+
+MATCH (af10:Affiliation {name:'Università di Firenze'})
+CREATE (a10:Author {
+    firstName:'Valentina', surname:'Costa', email:'valentina.costa@unifi.it',
+    researchArea:'Graph Databases', hIndex:22
+})-[:AFFILIATED_WITH]->(af10);
+
+MATCH (af1:Affiliation {name:'Politecnico di Milano'})
+CREATE (a11:Author {
+    firstName:'Paolo', surname:'Esposito', email:'paolo.esposito@polimi.it',
+    researchArea:'Computer Vision', hIndex:33
+})-[:AFFILIATED_WITH]->(af1);
+
+MATCH (af2:Affiliation {name:'Università di Bologna'})
+CREATE (a12:Author {
+    firstName:'Laura', surname:'Romano', email:'laura.romano@unibo.it',
+    researchArea:'Machine Learning', hIndex:27
+})-[:AFFILIATED_WITH]->(af2);
+
+
+// Creazione degli Articoli
+
+CREATE (:Article {title:'Transformer-Based Architectures for Medical Image Segmentation', year:2024, doi:'10.1109/CVPR.2024.00123', abstract:'Proponiamo un nuovo approccio basato su transformer per la segmentazione di immagini mediche.', citations:156});
+
+CREATE (:Article {title:'Graph Neural Networks for Drug Discovery: A Comprehensive Survey', year:2023, doi:'10.1038/s41592-023-01845-2', abstract:'Survey completo sull applicazione delle GNN nella scoperta di farmaci.', citations:423});
+
+CREATE (:Article {title:'Efficient Query Processing in Large-Scale Knowledge Graphs', year:2024, doi:'10.14778/3611479.3611521', abstract:'Presentiamo tecniche di ottimizzazione per query su knowledge graph di grandi dimensioni.', citations:87});
+
+CREATE (:Article {title:'Self-Supervised Learning for Protein Structure Prediction', year:2025, doi:'10.1093/bioinformatics/btae012', abstract:'Metodo di apprendimento auto-supervisionato per predire strutture proteiche.', citations:64});
+
+CREATE (:Article {title:'Attention Mechanisms in Natural Language Understanding: Beyond BERT', year:2023, doi:'10.18653/v1/2023.acl-long.142', abstract:'Analizziamo nuove architetture di attenzione che superano le limitazioni di BERT.', citations:312});
+
+CREATE (:Article {title:'Real-Time Object Detection with Efficient Vision Transformers', year:2024, doi:'10.1109/CVPR.2024.00456', abstract:'Vision transformer ottimizzati per il rilevamento di oggetti in tempo reale.', citations:198});
+
+CREATE (:Article {title:'Federated Learning for Privacy-Preserving Genomic Analysis', year:2025, doi:'10.1038/s41588-025-01723-5', abstract:'Framework di federated learning per analisi genomiche preservando la privacy.', citations:45});
+
+CREATE (:Article {title:'Reinforcement Learning for Autonomous Database Tuning', year:2024, doi:'10.1145/3626246.3653389', abstract:'Sistema basato su RL per la configurazione automatica di database.', citations:72});
+
+CREATE (:Article {title:'Multimodal Large Language Models for Scientific Document Understanding', year:2025, doi:'10.18653/v1/2025.acl-long.089', abstract:'LLM multimodali specializzati nella comprensione di documenti scientifici.', citations:28});
+
+CREATE (:Article {title:'Scalable Graph Indexing for Billion-Edge Networks', year:2023, doi:'10.14778/3594512.3594534', abstract:'Tecniche di indicizzazione per grafi con miliardi di archi.', citations:134});
+
+CREATE (:Article {title:'Deep Learning for Single-Cell RNA Sequencing Analysis', year:2024, doi:'10.1093/bioinformatics/btae156', abstract:'Metodi di deep learning per l analisi di dati single-cell.', citations:189});
+
+CREATE (:Article {title:'Neural Architecture Search for Edge Computing', year:2024, doi:'10.5555/3618408.3618567', abstract:'NAS ottimizzato per dispositivi edge con risorse limitate.', citations:95});
+
+CREATE (:Article {title:'Temporal Knowledge Graphs: Representation and Reasoning', year:2023, doi:'10.1145/3539597.3570412', abstract:'Formalismi e algoritmi per knowledge graph temporali.', citations:167});
+
+CREATE (:Article {title:'Contrastive Learning for Biomedical Entity Linking', year:2024, doi:'10.18653/v1/2024.naacl-long.234', abstract:'Approccio contrastivo per collegare entità in testi biomedici.', citations:56});
+
+CREATE (:Article {title:'Zero-Shot Visual Recognition with Foundation Models', year:2025, doi:'10.1109/ICCV.2025.00789', abstract:'Riconoscimento visuale zero-shot usando foundation model.', citations:33});
+
+
+// Creazione della relazione PUBLISHED_IN
+
+MATCH (ar:Article {doi:'10.1109/CVPR.2024.00123'}), (v:Venue {name:'CVPR'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1038/s41592-023-01845-2'}), (v:Venue {name:'Nature Methods'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.14778/3611479.3611521'}), (v:Venue {name:'VLDB'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1093/bioinformatics/btae012'}), (v:Venue {name:'Bioinformatics'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.18653/v1/2023.acl-long.142'}), (v:Venue {name:'ACL'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1109/CVPR.2024.00456'}), (v:Venue {name:'CVPR'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1038/s41588-025-01723-5'}), (v:Venue {name:'Nature Methods'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1145/3626246.3653389'}), (v:Venue {name:'SIGMOD'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.18653/v1/2025.acl-long.089'}), (v:Venue {name:'ACL'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.14778/3594512.3594534'}), (v:Venue {name:'VLDB'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1093/bioinformatics/btae156'}), (v:Venue {name:'Bioinformatics'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.5555/3618408.3618567'}), (v:Venue {name:'NeurIPS'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1145/3539597.3570412'}), (v:Venue {name:'SIGMOD'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.18653/v1/2024.naacl-long.234'}), (v:Venue {name:'ACL'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+MATCH (ar:Article {doi:'10.1109/ICCV.2025.00789'}), (v:Venue {name:'ICLR'})
+MERGE (ar)-[:PUBLISHED_IN]->(v);
+
+
+// Creazione della relazione COVERS
+
+MATCH (ar:Article {doi:'10.1109/CVPR.2024.00123'})
+MATCH (t1:Topic {name:'Deep Learning'}), (t2:Topic {name:'Computer Vision'}), (t3:Topic {name:'Bioinformatics'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.1038/s41592-023-01845-2'})
+MATCH (t1:Topic {name:'Machine Learning'}), (t2:Topic {name:'Bioinformatics'}), (t3:Topic {name:'Graph Databases'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.14778/3611479.3611521'})
+MATCH (t1:Topic {name:'Database Systems'}), (t2:Topic {name:'Graph Databases'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2);
+
+MATCH (ar:Article {doi:'10.1093/bioinformatics/btae012'})
+MATCH (t1:Topic {name:'Deep Learning'}), (t2:Topic {name:'Bioinformatics'}), (t3:Topic {name:'Genomics'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.18653/v1/2023.acl-long.142'})
+MATCH (t1:Topic {name:'Natural Language Processing'}), (t2:Topic {name:'Deep Learning'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2);
+
+MATCH (ar:Article {doi:'10.1109/CVPR.2024.00456'})
+MATCH (t1:Topic {name:'Computer Vision'}), (t2:Topic {name:'Deep Learning'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2);
+
+MATCH (ar:Article {doi:'10.1038/s41588-025-01723-5'})
+MATCH (t1:Topic {name:'Machine Learning'}), (t2:Topic {name:'Genomics'}), (t3:Topic {name:'Bioinformatics'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.1145/3626246.3653389'})
+MATCH (t1:Topic {name:'Reinforcement Learning'}), (t2:Topic {name:'Database Systems'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2);
+
+MATCH (ar:Article {doi:'10.18653/v1/2025.acl-long.089'})
+MATCH (t1:Topic {name:'Natural Language Processing'}), (t2:Topic {name:'Deep Learning'}), (t3:Topic {name:'Computer Vision'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.14778/3594512.3594534'})
+MATCH (t1:Topic {name:'Graph Databases'}), (t2:Topic {name:'Database Systems'}), (t3:Topic {name:'Data Mining'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.1093/bioinformatics/btae156'})
+MATCH (t1:Topic {name:'Deep Learning'}), (t2:Topic {name:'Bioinformatics'}), (t3:Topic {name:'Genomics'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.5555/3618408.3618567'})
+MATCH (t1:Topic {name:'Deep Learning'}), (t2:Topic {name:'Machine Learning'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t2);
+
+MATCH (ar:Article {doi:'10.1145/3539597.3570412'})
+MATCH (t1:Topic {name:'Graph Databases'}), (t2:Topic {name:'Database Systems'}), (t3:Topic {name:'Machine Learning'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.18653/v1/2024.naacl-long.234'})
+MATCH (t1:Topic {name:'Natural Language Processing'}), (t2:Topic {name:'Bioinformatics'}), (t3:Topic {name:'Deep Learning'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t3);
+
+MATCH (ar:Article {doi:'10.1109/ICCV.2025.00789'})
+MATCH (t1:Topic {name:'Computer Vision'}), (t2:Topic {name:'Deep Learning'}), (t3:Topic {name:'Machine Learning'})
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t1)
+MERGE (ar)-[:COVERS {relevance:'primary'}]->(t2)
+MERGE (ar)-[:COVERS {relevance:'secondary'}]->(t3);
+
+
+// Creazione delle relazioni CITES
+
+MATCH (citing:Article {doi:'10.1109/CVPR.2024.00123'}), (cited:Article {doi:'10.1038/s41592-023-01845-2'})
+MERGE (citing)-[:CITES {context:'methodology'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1109/CVPR.2024.00123'}), (cited:Article {doi:'10.18653/v1/2023.acl-long.142'})
+MERGE (citing)-[:CITES {context:'related work'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1093/bioinformatics/btae012'}), (cited:Article {doi:'10.1038/s41592-023-01845-2'})
+MERGE (citing)-[:CITES {context:'foundation'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1109/CVPR.2024.00456'}), (cited:Article {doi:'10.18653/v1/2023.acl-long.142'})
+MERGE (citing)-[:CITES {context:'methodology'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1038/s41588-025-01723-5'}), (cited:Article {doi:'10.1038/s41592-023-01845-2'})
+MERGE (citing)-[:CITES {context:'foundation'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1038/s41588-025-01723-5'}), (cited:Article {doi:'10.1093/bioinformatics/btae012'})
+MERGE (citing)-[:CITES {context:'related work'}]->(cited);
+
+MATCH (citing:Article {doi:'10.18653/v1/2025.acl-long.089'}), (cited:Article {doi:'10.18653/v1/2023.acl-long.142'})
+MERGE (citing)-[:CITES {context:'foundation'}]->(cited);
+
+MATCH (citing:Article {doi:'10.14778/3611479.3611521'}), (cited:Article {doi:'10.14778/3594512.3594534'})
+MERGE (citing)-[:CITES {context:'methodology'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1145/3626246.3653389'}), (cited:Article {doi:'10.14778/3594512.3594534'})
+MERGE (citing)-[:CITES {context:'related work'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1145/3539597.3570412'}), (cited:Article {doi:'10.14778/3594512.3594534'})
+MERGE (citing)-[:CITES {context:'foundation'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1093/bioinformatics/btae156'}), (cited:Article {doi:'10.1038/s41592-023-01845-2'})
+MERGE (citing)-[:CITES {context:'foundation'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1093/bioinformatics/btae156'}), (cited:Article {doi:'10.1093/bioinformatics/btae012'})
+MERGE (citing)-[:CITES {context:'methodology'}]->(cited);
+
+MATCH (citing:Article {doi:'10.5555/3618408.3618567'}), (cited:Article {doi:'10.18653/v1/2023.acl-long.142'})
+MERGE (citing)-[:CITES {context:'related work'}]->(cited);
+
+MATCH (citing:Article {doi:'10.5555/3618408.3618567'}), (cited:Article {doi:'10.1109/CVPR.2024.00456'})
+MERGE (citing)-[:CITES {context:'methodology'}]->(cited);
+
+MATCH (citing:Article {doi:'10.18653/v1/2024.naacl-long.234'}), (cited:Article {doi:'10.18653/v1/2023.acl-long.142'})
+MERGE (citing)-[:CITES {context:'foundation'}]->(cited);
+
+MATCH (citing:Article {doi:'10.18653/v1/2024.naacl-long.234'}), (cited:Article {doi:'10.1038/s41592-023-01845-2'})
+MERGE (citing)-[:CITES {context:'methodology'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1109/ICCV.2025.00789'}), (cited:Article {doi:'10.1109/CVPR.2024.00456'})
+MERGE (citing)-[:CITES {context:'foundation'}]->(cited);
+
+MATCH (citing:Article {doi:'10.1109/ICCV.2025.00789'}), (cited:Article {doi:'10.18653/v1/2023.acl-long.142'})
+MERGE (citing)-[:CITES {context:'related work'}]->(cited);
