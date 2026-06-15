@@ -25,7 +25,7 @@ SELECT
         WHEN n <= 100 THEN 'H004'
         ELSE 'H005'
     END AS hotel_codice,
-    LPAD((n-1)%20+1, 3, '0') AS numero,
+    LPAD((n-1)%25+1, 3, '0') AS numero,
     ELT(FLOOR(1 + RAND()*3), 'T1','T2','T3') AS id_tipologia,
     ELT(FLOOR(1 + RAND()*3), 'Libera','Occupata','In manutenzione') AS stato
 FROM (
@@ -91,5 +91,6 @@ JOIN (
     SELECT hotel_codice, numero, id_tipologia
     FROM Camera
     ORDER BY RAND()
+    LIMIT 450
 ) AS c
 ON 1=1;
