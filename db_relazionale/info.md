@@ -29,8 +29,8 @@ Vedere [creazione_db.sql](./db_relazionale/creazione_db.sql)
 
 Vedere [query_popolamento_db.sql](./db_relazionale/query_popolamento_db.sql)
 
-- Generazione automatica di **100 camere** tramite una sequenza costruita interrogando `information_schema.columns`. 
-- Creazione di **60 clienti** con email generate dinamicamente e garantite uniche.  
+- Generazione automatica di **125 camere** tramite una sequenza costruita interrogando `information_schema.columns`. 
+- Creazione di **80 clienti** con email generate dinamicamente e garantite uniche.  
 - Inserimento di **250 prenotazioni** con date casuali ma coerenti.
 
 #### **Trigger**
