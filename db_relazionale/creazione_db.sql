@@ -49,7 +49,21 @@ CREATE TABLE Cliente (
     email       VARCHAR(100) UNIQUE NOT NULL
 );
 
--- 5. Creazione entità PRENOTAZIONE 
+-- 5. Trigger per calcolare importo totale
+DELIMITER $$
+
+CREATE TRIGGER trg_calcola_importo_totale
+BEFORE INSERT ON Prenotazione
+FOR EACH ROW
+BEGIN
+    DECLARE numero_notti INT;
+    SET numero_notti = DATEDIFF(NEW.data_partenza, NEW.data_arrivo);
+    SET NEW.importo_totale = NEW.prezzo_notte_bloccato * numero_notti;
+END$$
+
+DELIMITER ;
+
+-- 6. Creazione entità PRENOTAZIONE 
 CREATE TABLE Prenotazione (
     id_prenotazione          VARCHAR(20) PRIMARY KEY,
     cliente_codice           VARCHAR(20) NOT NULL,
@@ -78,3 +92,29 @@ CREATE TABLE Prenotazione (
     
     CHECK (data_partenza > data_arrivo)
 );
+
+-- 7. Trigger per verificare che le prenotazioni delle camere non si sovrappongano
+DELIMITER $$
+
+CREATE TRIGGER trg_no_overlapping_reservations
+BEFORE INSERT ON Prenotazione
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Prenotazione p
+        WHERE 
+            p.hotel_codice = NEW.hotel_codice
+            AND p.camera_numero = NEW.camera_numero
+            AND p.stato_prenotazione NOT IN ('Cancellata', 'No-Show')
+            AND (
+                NEW.data_arrivo < p.data_partenza
+                AND NEW.data_partenza > p.data_arrivo
+            )
+    ) THEN
+        SIGNAL SQLSTATE '45000' 
+		SET MESSAGE_TEXT = 'Errore: La camera selezionata è già occupata in quelle date.';
+    END IF;
+END$$
+
+DELIMITER ;
