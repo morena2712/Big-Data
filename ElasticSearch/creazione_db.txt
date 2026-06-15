@@ -1,0 +1,41 @@
+# Creazione indice prenotazioni (HOTEL)
+
+PUT prenotazioni
+{
+  "mappings": {
+    "properties": {
+      "hotel_id": { "type": "keyword" },
+      "hotel_nome": { "type": "text" },
+      "cliente_id": { "type": "keyword" },
+      "cliente_nome": { "type": "text" },
+      "cliente_cognome": { "type": "text" },
+      "camera_id": { "type": "keyword" },
+      "data_arrivo": { "type": "date" },
+      "data_partenza": { "type": "date" },
+      "importo_totale": { "type": "float" }
+    }
+  }
+}
+
+# Creazione indice articoli scientifici
+
+PUT articoli
+{
+  "mappings": {
+    "properties": {
+      "doi": { "type": "keyword" },
+      "titolo": { "type": "text" },
+      "anno": { "type": "integer" },
+      "temi": { "type": "keyword" },
+      "autori": {
+        "type": "nested",
+        "properties": {
+          "autore_id": { "type": "keyword" },
+          "nome": { "type": "text" },
+          "cognome": { "type": "text" }
+        }
+      },
+      "cita": { "type": "keyword" }
+    }
+  }
+}
