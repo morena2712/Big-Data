@@ -67,10 +67,10 @@ INSERT INTO Prenotazione (
 )
 SELECT
     CONCAT('P', SUBSTRING(UUID(), 1, 8)) AS id_prenotazione,
-    CONCAT('C', LPAD(FLOOR(1 + RAND()*60),3,'0')) AS cliente_codice,
+    CONCAT('C', LPAD(FLOOR(1 + RAND()*80),3,'0')) AS cliente_codice,
     c.hotel_codice,
     c.numero AS camera_numero,
-    DATE_ADD('2026-01-01', INTERVAL @arr := FLOOR(RAND()*300) DAY) AS data_arrivo,
+    DATE_ADD('2026-01-01', INTERVAL @arr := FLOOR(RAND()*365) DAY) AS data_arrivo,
     DATE_ADD('2026-01-01', INTERVAL @arr + FLOOR(1 + RAND()*7) DAY) AS data_partenza,
     FLOOR(1 + RAND()*3) AS numero_pax,
     ELT(FLOOR(1 + RAND()*6),
