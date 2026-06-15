@@ -31,7 +31,7 @@ Vedere [query_popolamento_db.sql](./db_relazionale/query_popolamento_db.sql)
 
 - Generazione automatica di **125 camere** tramite una sequenza costruita interrogando `information_schema.columns`. 
 - Creazione di **80 clienti** con email generate dinamicamente e garantite uniche.  
-- Inserimento di **250 prenotazioni** con date casuali ma coerenti.
+- Inserimento di **450 prenotazioni** con date casuali ma coerenti.
 
 #### **Trigger**
 - **Trigger calcolo importo_totale**, attivo prima dell’inserimento delle prenotazioni.  
