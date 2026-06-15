@@ -1,0 +1,86 @@
+# 1. Prenotazioni di un hotel in un intervallo di date
+GET prenotazioni/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "hotel_id": "H001" } }
+      ],
+      "filter": [
+        { "range": { "data_arrivo": { "lte": "2026-06-30" } } },
+        { "range": { "data_partenza": { "gte": "2026-06-01" } } }
+      ]
+    }
+  }
+}
+
+# 2. Clienti con il maggior numero di prenotazioni
+GET prenotazioni/_search
+{
+  "size": 0,
+  "aggs": {
+    "clienti_top": {
+      "terms": {
+        "field": "cliente_id",
+        "size": 10,
+        "order": { "_count": "desc" }
+      },
+      "aggs": {
+        "dati_cliente": {
+          "top_hits": {
+            "size": 1,
+            "_source": ["cliente_nome", "cliente_cognome"]
+          }
+        }
+      }
+    }
+  }
+}
+
+# 3. Articoli che citano un determinato DOI
+GET articoli/_search
+{
+  "query": {
+    "term": {
+      "cita": "10.1000/A1"
+    }
+  }
+}
+
+# 4. Autori che pubblicano sullo stesso tema
+GET articoli/_search
+{
+  "size": 0,
+  "query": {
+    "term": { "temi": "machine learning" }
+  },
+  "aggs": {
+    "autori_ml": {
+      "terms": {
+        "field": "autori.autore_id",
+        "size": 10
+      }
+    }
+  }
+}
+
+# 5. Coppie di autori che hanno collaborato
+GET articoli/_search
+{
+  "size": 0,
+  "aggs": {
+    "coautori": {
+      "nested": { "path": "autori" },
+      "aggs": {
+        "autori": {
+          "terms": { "field": "autori.autore_id", "size": 10 },
+          "aggs": {
+            "co": {
+              "terms": { "field": "autori.autore_id", "size": 10 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
