@@ -19,12 +19,11 @@ INSERT INTO Tipologia VALUES
 INSERT INTO Camera (hotel_codice, numero, id_tipologia, stato)
 SELECT
     CASE
-        WHEN n <= 20 THEN 'H001'
-        WHEN n <= 40 THEN 'H002'
-        WHEN n <= 60 THEN 'H003'
-        WHEN n <= 80 THEN 'H004'
-        WHEN n <= 100 THEN 'H005'
-        ELSE 'H006'
+        WHEN n <= 25 THEN 'H001'
+        WHEN n <= 50 THEN 'H002'
+        WHEN n <= 75 THEN 'H003'
+        WHEN n <= 100 THEN 'H004'
+        ELSE 'H005'
     END AS hotel_codice,
     LPAD((n-1)%20+1, 3, '0') AS numero,
     ELT(FLOOR(1 + RAND()*3), 'T1','T2','T3') AS id_tipologia,
@@ -32,7 +31,7 @@ SELECT
 FROM (
     SELECT @row := @row + 1 AS n
     FROM information_schema.columns, (SELECT @row := 0) r
-    LIMIT 120
+    LIMIT 125
 ) AS seq;
 
 -- 4. Inserimento dati in CLIENTE
