@@ -1,0 +1,91 @@
+//Conteggio dei nodi per label
+MATCH (n)
+RETURN labels(n) AS label, count(*) AS count
+ORDER BY count DESC;
+
+//Autori con proprietà mancanti
+MATCH (a:Author)
+WHERE a.email IS NULL OR a.firstName IS NULL OR a.surname IS NULL
+RETURN a;
+
+//Articoli con proprietà mancanti
+MATCH (ar:Article)
+WHERE ar.doi IS NULL OR ar.title IS NULL
+RETURN ar;
+
+//Topic senza nome
+MATCH (t:Topic)
+WHERE t.name IS NULL
+RETURN t;
+
+//Venue senza nome
+MATCH (v:Venue)
+WHERE v.name IS NULL
+RETURN v;
+
+//Articoli senza autore
+MATCH (ar:Article)
+WHERE NOT (ar)-[:AUTHORED_BY]->(:Author)
+RETURN ar;
+
+//Articoli senza venue
+MATCH (ar:Article)
+WHERE NOT (ar)-[:PUBLISHED_IN]->(:Venue)
+RETURN ar;
+
+//Articoli senza topic
+MATCH (ar:Article)
+WHERE NOT (ar)-[:COVERS]->(:Topic)
+RETURN ar;
+
+//Articoli senza citazioni (né in entrata né in uscita)
+MATCH (ar:Article)
+WHERE NOT (ar)-[:CITES]->(:Article)
+  AND NOT (:Article)-[:CITES]->(ar)
+RETURN ar;
+
+//Autori duplicati per email
+MATCH (a:Author)
+WITH a.email AS email, count(*) AS c
+WHERE c > 1
+RETURN email, c;
+
+//Relazioni CO_AUTHORED incoerenti
+MATCH (a1:Author)-[:CO_AUTHORED]-(a2:Author)
+WHERE NOT EXISTS {
+    MATCH (a1)<-[:AUTHORED_BY]-(ar:Article)-[:AUTHORED_BY]->(a2)
+}
+RETURN a1, a2;
+
+//Coppie di autori che hanno scritto insieme ma senza CO_AUTHORED
+MATCH (a1:Author)<-[:AUTHORED_BY]-(ar:Article)-[:AUTHORED_BY]->(a2:Author)
+WHERE id(a1) < id(a2)
+AND NOT (a1)-[:CO_AUTHORED]-(a2)
+RETURN a1, a2, ar;
+
+//Articoli che citano se stessi
+MATCH (ar:Article)-[c:CITES]->(ar)
+RETURN ar, c;
+
+//Duplicati nelle relazioni CITES
+MATCH (a1:Article)-[c:CITES]->(a2:Article)
+WITH a1, a2, count(*) AS c
+WHERE c > 1
+RETURN a1, a2, c;
+
+//Topic non collegati ad alcun articolo
+MATCH (t:Topic)
+WHERE NOT (:Article)-[:COVERS]->(t)
+RETURN t;
+
+//Articolo con più relazioni COVERS duplicate
+MATCH (ar:Article)-[c:COVERS]->(t:Topic)
+WITH ar, t, count(*) AS c
+WHERE c > 1
+RETURN ar, t, c;
+
+//Normalizzazione della rilevanza dei topic primari
+MATCH (ar:Article)-[r:COVERS {relevance:'primary'}]->(t:Topic)
+WITH ar, collect(r) AS rels
+WHERE size(rels) > 1
+FOREACH (r IN tail(rels) | SET r.relevance = 'secondary');
