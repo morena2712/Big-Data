@@ -1,0 +1,19 @@
+# Inserimento dati prenotazioni hotel
+POST prenotazioni/_bulk
+{ "index": {} }
+{"hotel_id":"H001","hotel_nome":"Hotel Roma","cliente_id":"C01","cliente_nome":"Mario","cliente_cognome":"Rossi","camera_id":"101","data_arrivo":"2026-06-10","data_partenza":"2026-06-12","importo_totale":200}
+{ "index": {} }
+{"hotel_id":"H001","hotel_nome":"Hotel Roma","cliente_id":"C02","cliente_nome":"Luca","cliente_cognome":"Bianchi","camera_id":"102","data_arrivo":"2026-06-15","data_partenza":"2026-06-18","importo_totale":350}
+{ "index": {} }
+{"hotel_id":"H002","hotel_nome":"Hotel Milano","cliente_id":"C01","cliente_nome":"Mario","cliente_cognome":"Rossi","camera_id":"201","data_arrivo":"2026-06-05","data_partenza":"2026-06-07","importo_totale":180}
+{ "index": {} }
+{"hotel_id":"H001","hotel_nome":"Hotel Roma","cliente_id":"C01","cliente_nome":"Mario","cliente_cognome":"Rossi","camera_id":"103","data_arrivo":"2026-06-20","data_partenza":"2026-06-22","importo_totale":220}
+
+# Inserimento dati articoli scientifici
+POST articoli/_bulk
+{ "index": {} }
+{"doi":"10.1000/A1","titolo":"Machine Learning Basics","anno":2024,"temi":["machine learning"],"autori":[{"autore_id":"AU1","nome":"Alice","cognome":"Bianchi"}],"cita":[]}
+{ "index": {} }
+{"doi":"10.1000/A2","titolo":"Deep Learning Advances","anno":2025,"temi":["machine learning","deep learning"],"autori":[{"autore_id":"AU2","nome":"Luca","cognome":"Verdi"}],"cita":["10.1000/A1"]}
+{ "index": {} }
+{"doi":"10.1000/A3","titolo":"Neural Networks in Vision","anno":2025,"temi":["computer vision","deep learning"],"autori":[{"autore_id":"AU1","nome":"Alice","cognome":"Bianchi"},{"autore_id":"AU3","nome":"Marco","cognome":"Neri"}],"cita":["10.1000/A1"]}
