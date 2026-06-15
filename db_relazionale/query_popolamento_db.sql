@@ -23,7 +23,8 @@ SELECT
         WHEN n <= 40 THEN 'H002'
         WHEN n <= 60 THEN 'H003'
         WHEN n <= 80 THEN 'H004'
-        ELSE 'H005'
+        WHEN n <= 100 THEN 'H005'
+        ELSE 'H006'
     END AS hotel_codice,
     LPAD((n-1)%20+1, 3, '0') AS numero,
     ELT(FLOOR(1 + RAND()*3), 'T1','T2','T3') AS id_tipologia,
@@ -31,7 +32,7 @@ SELECT
 FROM (
     SELECT @row := @row + 1 AS n
     FROM information_schema.columns, (SELECT @row := 0) r
-    LIMIT 100
+    LIMIT 120
 ) AS seq;
 
 -- 4. Inserimento dati in CLIENTE
@@ -55,7 +56,7 @@ SELECT
 FROM (
     SELECT @i := @i + 1 AS n
     FROM information_schema.columns, (SELECT @i := 0) r
-    LIMIT 60
+    LIMIT 80
 ) AS seq;
 
 -- 5. Inserimento dati in PRENOTAZIONE
@@ -85,7 +86,7 @@ SELECT
 FROM (
     SELECT @p := @p + 1 AS n
     FROM information_schema.columns, (SELECT @p := 0) r
-    LIMIT 250
+    LIMIT 320
 ) AS seq
 JOIN (
     SELECT hotel_codice, numero, id_tipologia
