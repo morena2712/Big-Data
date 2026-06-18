@@ -1,90 +1,87 @@
-# **Database Relazionale (Sintesi Tecnica)**
+# **Database Relazionale (MySQL)**
 
-## **1. Modello Concettuale**
+## **1. Modello Concettuale ed Architetturale**
 
 <img width="3552" height="1908" alt="erdplus (2)" src="https://github.com/user-attachments/assets/adf70b79-d910-4e17-8ada-4fadeee2d35a" />
 
-Il modello ER è stato progettato con ERDPlus e si basa su cinque entità principali: **Hotel**, **Camera**, **Tipologia**, **Cliente**, **Prenotazione**.  
-Le relazioni implementano i vincoli del dominio:
+Il nucleo transazionale del sistema è strutturato su un modello Entità-Relazione (ER) ingegnerizzato tramite ERDPlus. L'architettura si sviluppa attorno a cinque entità principali: Hotel, Camera, Tipologia, Cliente e Prenotazione.
 
-- **POSSIEDE** — relazione identificante tra Hotel e Camera: una camera non può esistere senza hotel.  
-- **CLASSIFICA** — ogni camera appartiene obbligatoriamente a una tipologia.  
-- **EFFETTUA** — ogni prenotazione deve essere associata a un cliente.  
-- **ASSOCIA** — ogni prenotazione blocca esattamente una camera.
+Le relazioni logiche sono state modellate per riflettere i reali vincoli operativi del dominio alberghiero:
 
-Scelte progettuali fondamentali:
+* POSSIEDE: Relazione di identificazione forte tra Hotel e Camera. Implementa la dipendenza esistenziale: una camera non può essere censita nel sistema senza un hotel di riferimento.
+* CLASSIFICA: Relazione obbligatoria che associa ogni stanza a una categoria tariffaria della tabella Tipologia.
+* EFFETTUA: Collega ogni pratica commerciale a un'anagrafica censita nella tabella Cliente.
+* ASSOCIA: Vincola in modo univoco ogni record di Prenotazione a una specifica Camera.
 
-- **Tipologia come entità separata** per eliminare ridondanza e anomalie di aggiornamento.  
-- **prezzo_notte_bloccato nella relazione ASSOCIA** utile come snapshot del prezzo al momento della prenotazione.  
-- **importo_totale salvato fisicamente** per migliorare la performance nelle analisi economiche.
+### Scelte Progettuali Chiave
 
-## **2. Implementazione SQL**
-L’implementazione è stata realizzata in MySQL tramite DBeaver.
+* Isolamento delle Tipologie: La separazione delle tariffe base in un'entità dedicata elimina le ridondanze informative e previene anomalie in fase di aggiornamento dei listini.
+* Snapshot dei Prezzi: Il campo `prezzo_notte_bloccato` è storicizzato direttamente nella prenotazione al fine di preservare l'integrità dei report finanziari storici a fronte di future variazioni dei prezzi di listino.
+* Ridondanza Calcolata (Importo Totale): Il campo `importo_totale` viene memorizzato fisicamente sul disco. Questa denormalizzazione mirata abbatte i costi computazionali delle funzioni di aggregazione (`SUM`, `AVG`) nelle query di Business Intelligence.
 
-### **Creazione del database**
+## 2. Implementazione SQL e Data Seeding
 
-Vedere [creazione_db.sql](./db_relazionale/creazione_db.sql)
+L'infrastruttura è stata sviluppata in ambiente MySQL 8.0+ utilizzando DBeaver come client di gestione.
 
-### **Popolamento**
+* Vedere il file [creazione_db.sql](https://www.google.com/search?q=./db_relazionale/creazione_db.sql)
+* Vedere il file [query_popolamento_db.sql](https://www.google.com/search?q=./db_relazionale/query_popolamento_db.sql)
 
-Vedere [query_popolamento_db.sql](./db_relazionale/query_popolamento_db.sql)
+Il popolamento automatizzato sfrutta un generatore sequenziale basato sulla tabella di sistema `information_schema.columns` combinato con funzioni matematiche di MySQL per garantire volumi realistici:
 
-- Generazione automatica di **125 camere** tramite una sequenza costruita interrogando `information_schema.columns`. 
-- Creazione di **80 clienti** con email generate dinamicamente e garantite uniche.  
-- Inserimento di **450 prenotazioni** con date casuali ma coerenti.
+* 125 Camere distribuite equamente (25 stanze per struttura) sui 5 hotel pugliesi.
+* 80 Clienti generati combinando liste di nomi e cognomi reali, completi di contatti telefonici e indirizzi e-mail unici verificati.
+* 450 Prenotazioni distribuite lungo l'intero anno amministrativo 2026, con lunghezze di soggiorno coerenti e variabili.
 
-#### **Trigger**
-- **Trigger calcolo importo_totale**, attivo prima dell’inserimento delle prenotazioni.  
-- **Trigger anti-overbooking**, attivato *dopo* il popolamento per evitare blocchi durante la generazione dei dati.
+### Logiche dei Trigger Aziendali
 
+* Trigger `BEFORE INSERT`: Intercetta la transazione prima della scrittura fisica e calcola l'importo totale moltiplicando i giorni di permanenza reali per la tariffa bloccata per notte.
+* Trigger Post-Popolamento (Anti-Overbooking): Configurato e attivato subito dopo il seeding dei dati di test per proteggere il sistema in fase operativa, bloccando a livello transazionale l'inserimento di prenotazioni sovrapposte sulla stessa camera.
 
-## **3. Vincoli e Integrità**
-- `CHECK (data_partenza > data_arrivo)` per impedire errori temporali.  
-- `CHECK (numero_pax > 0)` per garantire prenotazioni valide.  
-- `ON DELETE CASCADE` su cliente, in modo da eliminare automaticamente lo storico associato.  
-- Chiave esterna composta `(hotel_codice, camera_numero)` per implementare correttamente la relazione ASSOCIA.
+## 3. Vincoli e Integrità dei Dati
 
+A protezione della consistenza della base di dati sono stati implementati rigidi vincoli di integrità referenziale e regole di validazione nativa:
 
-## **4. Query di Analisi**
-Le interrogazioni sviluppate coprono tutte le esigenze gestionali:
+* Integrità Temporale: `CHECK (data_partenza > data_arrivo)` impedisce l'inserimento di incongruenze cronologiche nelle prenotazioni.
+* Validazione del Business: `CHECK (numero_pax > 0)` assicura che ogni prenotazione registri almeno un occupante pagante.
+* Manutenzione del Database: L'opzione `ON DELETE CASCADE` applicata sulla chiave esterna del cliente automatizza la pulizia dello storico e delle prenotazioni collegate in caso di rimozione dell'anagrafica.
+* Integrità Referenziale Composta: La relazione di allocazione sfrutta una chiave esterna composta `(hotel_codice, camera_numero)` collegata alla chiave primaria di Camera, garantendo che il sistema assegni stanze realmente esistenti all'interno della specifica struttura selezionata.
 
-### **Capacità e disponibilità**
-- Numero camere per hotel  
-- Numero camere per tipologia  
-- Camere disponibili in un intervallo di date  
-- Camere più richieste  
-- Overbooking e sovrapposizioni
+## 4. Query di Analisi e Business Intelligence
 
-### **Domanda e comportamento dei clienti**
-- Clienti con più prenotazioni  
-- Clienti più redditizi  
-- Durata media dei soggiorni  
-- Clienti con prenotazioni attive
+Le interrogazioni sviluppate rispondono alle metriche prestazionali richieste dal controllo di gestione, ripartite in quattro macro-aree:
 
-### **Performance economica**
-- Fatturato totale  
-- Fatturato per hotel  
-- Fatturato mensile  
-- Prezzo medio per notte  
-- Impatto economico delle cancellazioni
+### Capacità e Disponibilità
 
-### **Cancellazioni**
-- Tasso di cancellazione  
-- Cancellazioni per hotel  
-- Cancellazioni per cliente  
+* Conteggio e saturazione delle camere per singolo hotel e per tipologia commerciale.
+* Verifica in tempo reale delle camere disponibili all'interno di un intervallo di date personalizzato tramite parametri.
+* Classifica delle sistemazioni più richieste e identificazione delle anomalie di occupazione.
 
-Ogni query è progettata per rispondere a una domanda gestionale reale e per validare la correttezza del modello.
+### Domanda e Comportamento dei Clienti
 
+* Identificazione dei clienti più attivi per volume di prenotazioni effettuate.
+* Analisi dei profili più redditizi per l'azienda.
+* Calcolo della durata media dei soggiorni per ottimizzare le strategie di marketing e di housekeeping.
 
-## **5. Obiettivo del Sistema**
-Il database relazionale fornisce:
+### Performance Economica
 
-- una struttura coerente e normalizzata,  
-- un dataset realistico e completo,  
-- strumenti analitici per valutare domanda, offerta, performance economica e comportamento dei clienti,  
-- un ambiente affidabile per simulare scenari gestionali reali.
+* Calcolo del fatturato lordo totale generato dall'intero network alberghiero.
+* Scomposizione dei ricavi ed estrazione dei flussi di cassa aggregati per hotel e su base mensile.
+* Analisi dell'andamento storico delle tariffe tramite il prezzo medio per notte bloccato.
 
+### Cancellazioni e Risk Management
 
-## **6. Conclusione**
-Il sistema integra progettazione concettuale, schema logico, vincoli, trigger, popolamento e interrogazioni avanzate.  
-L’insieme dimostra la capacità del modello di supportare analisi operative e strategiche, garantendo integrità dei dati, performance e coerenza con le esigenze del dominio alberghiero.
+* Calcolo del tasso di cancellazione globale (rapporto tra pratiche andate a buon fine e flussi di Cancellata / No-Show).
+* Reportistica delle cancellazioni per verificare l'affidabilità delle prenotazioni per hotel e per singolo cliente.
+* Analisi dell'impatto economico teorico e delle perdite finanziarie stimate causate dalle disdette.
+
+## 5. Obiettivo del Sistema
+
+Il modulo relazionale risponde perfettamente ai requisiti della traccia fornendo:
+
+1. Una struttura dati normalizzata che azzera la ridondanza e le anomalie tipiche dei file di testo piatti.
+2. Un ambiente transazionale sicuro basato sulle proprietà ACID per la gestione economica della reception.
+3. Un set completo di strumenti di analisi in grado di monitorare la redditività delle strutture, guidando le decisioni strategiche del management alberghiero.
+
+## 6. Conclusione
+
+Questo modulo rappresenta le fondamenta operative dell'intero progetto. L'integrazione di vincoli referenziali composti, trigger di calcolo e query di Business Intelligence dimostra come il modello relazionale sia la scelta ideale per governare i flussi strutturati e transazionali, garantendo la sicurezza e la stabilità dei dati di business.
