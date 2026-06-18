@@ -1,41 +1,26 @@
-# Creazione indice prenotazioni (HOTEL)
-
-PUT prenotazioni
+PUT /recensioni_hotel
 {
-  "mappings": {
-    "properties": {
-      "hotel_id": { "type": "keyword" },
-      "hotel_nome": { "type": "text" },
-      "cliente_id": { "type": "keyword" },
-      "cliente_nome": { "type": "text" },
-      "cliente_cognome": { "type": "text" },
-      "camera_id": { "type": "keyword" },
-      "data_arrivo": { "type": "date" },
-      "data_partenza": { "type": "date" },
-      "importo_totale": { "type": "float" }
-    }
-  }
-}
-
-# Creazione indice articoli scientifici
-
-PUT articoli
-{
-  "mappings": {
-    "properties": {
-      "doi": { "type": "keyword" },
-      "titolo": { "type": "text" },
-      "anno": { "type": "integer" },
-      "temi": { "type": "keyword" },
-      "autori": {
-        "type": "nested",
-        "properties": {
-          "autore_id": { "type": "keyword" },
-          "nome": { "type": "text" },
-          "cognome": { "type": "text" }
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "it_analyzer": {
+          "type": "italian"
         }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id_recensione": { "type": "keyword" },
+      "id_prenotazione": { "type": "keyword" },
+      "hotel_codice": { "type": "keyword" },
+      "cliente_codice": { "type": "keyword" },
+      "punteggio": { "type": "integer" },
+      "testo_recensione": {
+        "type": "text",
+        "analyzer": "it_analyzer"
       },
-      "cita": { "type": "keyword" }
+      "data_recensione": { "type": "date" }
     }
   }
 }
