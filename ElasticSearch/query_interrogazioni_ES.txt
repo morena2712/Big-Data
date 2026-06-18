@@ -1,86 +1,91 @@
-# 1. Prenotazioni di un hotel in un intervallo di date
-GET prenotazioni/_search
+# 1. Rating medio per Hotel sulla base delle recensioni
+GET /recensioni_hotel/_search
+{
+  "size": 0, 
+  "aggs": {
+    "hotel_raggruppati": {
+      "terms": {
+        "field": "hotel_codice"
+      },
+      "aggs": {
+        "voto_medio": {
+          "avg": {
+            "field": "punteggio"
+          }
+        }
+      }
+    }
+  }
+}
+
+
+# 2. Ispezionare comportamento del personale sulla base delle recensioni
+GET /recensioni_hotel/_search
 {
   "query": {
     "bool": {
       "must": [
-        { "term": { "hotel_id": "H001" } }
+        {
+          "multi_match": {
+            "query": "personale servizio",
+            "fields": ["testo_recensione"]
+          }
+        }
       ],
       "filter": [
-        { "range": { "data_arrivo": { "lte": "2026-06-30" } } },
-        { "range": { "data_partenza": { "gte": "2026-06-01" } } }
+        {
+          "range": {
+            "punteggio": {
+              "lte": 2
+            }
+          }
+        }
       ]
     }
   }
 }
 
-# 2. Clienti con il maggior numero di prenotazioni
-GET prenotazioni/_search
+
+# 3. Recensioni sulla pulizia delle camere
+GET /recensioni_hotel/_search
 {
-  "size": 0,
-  "aggs": {
-    "clienti_top": {
-      "terms": {
-        "field": "cliente_id",
-        "size": 10,
-        "order": { "_count": "desc" }
-      },
-      "aggs": {
-        "dati_cliente": {
-          "top_hits": {
-            "size": 1,
-            "_source": ["cliente_nome", "cliente_cognome"]
-          }
-        }
+  "query": {
+    "match": {
+      "testo_recensione": {
+        "query": "pulizia",
+        "fuzziness": "AUTO"
       }
     }
   }
 }
 
-# 3. Articoli che citano un determinato DOI
-GET articoli/_search
+
+# 4. Analisi dell'inquinamento acustico nel periodo estivo
+GET /recensioni_hotel/_search
 {
   "query": {
-    "term": {
-      "cita": "10.1000/A1"
-    }
-  }
-}
-
-# 4. Autori che pubblicano sullo stesso tema
-GET articoli/_search
-{
-  "size": 0,
-  "query": {
-    "term": { "temi": "machine learning" }
-  },
-  "aggs": {
-    "autori_ml": {
-      "terms": {
-        "field": "autori.autore_id",
-        "size": 10
-      }
-    }
-  }
-}
-
-# 5. Coppie di autori che hanno collaborato
-GET articoli/_search
-{
-  "size": 0,
-  "aggs": {
-    "coautori": {
-      "nested": { "path": "autori" },
-      "aggs": {
-        "autori": {
-          "terms": { "field": "autori.autore_id", "size": 10 },
-          "aggs": {
-            "co": {
-              "terms": { "field": "autori.autore_id", "size": 10 }
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "testo_recensione": {
+              "query": "rumore rumorosa caos caotica schiamazzi disturbo",
+              "operator": "or",
+              "fuzziness": "AUTO"
             }
           }
         }
-      }
+      ],
+      "filter": [
+        {
+          "range": {
+            "data_recensione": {
+              "gte": "2026-06-01",
+              "lte": "2026-09-15"
+            }
+          }
+        }
+      ]
     }
   }
 }
