@@ -1,21 +1,57 @@
-# Big-Data
+# Big Data: Architettura Dati Multi-Paradigma (MySQL, Neo4j, Elasticsearch)
 
-Questa repositary presenta la progettazione e l’analisi di due distinti domini applicativi attraverso l’uso di basi di dati relazionali e a grafo. La prima parte riguarda la gestione informatizzata di un gruppo alberghiero: vengono modellati hotel, camere, clienti e prenotazioni, con l’obiettivo di supportare il controllo della disponibilità, la prevenzione delle sovrapposizioni e la consultazione dello storico. Su questo modello vengono eseguite diverse query, tra cui l’analisi delle prenotazioni per intervallo temporale e l’identificazione dei clienti più attivi.
+Questo progetto mostra come gestire e analizzare i dati usando tre tipi di database diversi (relazionale, a grafo e documentale). Invece di usare un solo database per fare tutto, si è scelto il motore giusto per ogni specifico problema aziendale, ottenendo il massimo delle prestazioni.
 
-La seconda parte affronta la costruzione di un knowledge graph dedicato alle pubblicazioni scientifiche di un dipartimento di ricerca. Il modello include autori, articoli, citazioni e temi di ricerca, consentendo l’esplorazione delle reti di collaborazione e delle relazioni tematiche. Anche in questo caso vengono formulate query significative, come l’individuazione degli articoli che citano un determinato lavoro e degli autori che condividono un tema senza aver collaborato.
+## 1. Gestione Hotel: Database Relazionale (MySQL)
+### Il problema
+Un gruppo alberghiero con strutture dislocate in Puglia necessita di un'infrastruttura centralizzata per gestire l'operatività quotidiana: anagrafiche clienti, disponibilità delle camere in tempo reale, fatturazione e, come vincolo critico, l'assoluta eliminazione dei rischi di overbooking.
 
-## 1. Sistema per Gruppo Alberghiero
-Traccia: Un piccolo gruppo alberghiero vuole informatizzare la gestione delle proprie strutture. Ogni hotel è identificato da un codice, ha un nome, un indirizzo, una città e una categoria espressa in stelle. Ogni hotel dispone di diverse camere, contraddistinte da numero, tipologia, prezzo per notte e stato attuale, ad esempio libera, occupata o in manutenzione. Di ogni cliente si vogliono registrare codice, nome, cognome, telefono ed email. I clienti possono effettuare prenotazioni per una o più notti, indicando data di arrivo, data di partenza e numero di persone. Per ciascuna prenotazione il sistema deve associare una specifica camera e memorizzare anche l’importo totale previsto. La base di dati deve permettere di controllare la disponibilità delle camere e lo storico delle prenotazioni effettuate dai clienti.
+### Scelte architetturali
+Il sistema modella 5 hotel, 125 camere (25 stanze per struttura ripartite su tipologie Singola, Doppia e Suite), 80 clienti e uno storico controllato di 450 prenotazioni per l'anno 2026.
 
-## 2. Rete di pubblicazioni scientifiche.
-Traccia: Un dipartimento di ricerca vuole costruire un knowledge graph delle proprie pubblicazioni. Ogni autore ha nome, cognome, affiliazione, email e area di ricerca. Ogni articolo scientifico è descritto da titolo, anno, DOI e venue di pubblicazione. Gli articoli possono citare altri articoli, essere scritti da più autori e trattare uno o più temi scientifici. I temi sono concetti come machine learning, bioinformatica, database o computer vision. Il grafo deve consentire di analizzare collaborazioni scientifiche, reti di citazione e collegamenti tra temi di ricerca. Gli studenti devono modellare il dominio in modo da poter rispondere sia a domande strutturali sia a domande di esplorazione.
+Le tariffe standard risiedono nell'entità `Tipologia`. Al momento della prenotazione, il valore viene congelato nel campo `prezzo_notte_bloccato` di `Prenotazione`, rendendo lo storico finanziario immune da future modifiche dei listini aziendali.
 
-## 3. ElasticSearch
-Dopo aver modellato il dominio gestionale degli hotel in ambiente SQL, sfruttando la struttura relazionale per garantire integrità, vincoli e coerenza transazionale, e dopo aver rappresentato la rete delle pubblicazioni scientifiche in Neo4j, valorizzando la natura fortemente connessa dei dati tramite un grafo orientato alle relazioni, il passo successivo consiste nell’esplorare come gli stessi domini possano essere analizzati attraverso Elasticsearch.
+#### Logiche di Automazione (Trigger)
+`BEFORE INSERT` calcola automaticamente l'`importo_totale` moltiplicando i giorni del soggiorno per la tariffa bloccata per notte. Il trigger anti-overbooking blocca sul nascere qualsiasi inserimento o modifica di prenotazioni le cui date si sovrappongano a una stanza già occupata.
 
-In questo contesto, Elasticsearch non sostituisce i modelli precedenti, ma li completa:
+### Query di Controllo Operativo
+* Inventario della capacità e saturazione camere per struttura e tipologia.
+* Classificazione analitica dei clienti fidelizzati e dei principali top spender.
+* Business Intelligence economica: fatturato lordo totale, ricavi aggregati su base mensile e fluttuazione storica del prezzo medio per notte.
+* Monitoraggio del tasso di cancellazione e calcolo dell'impatto economico teorico dei flussi contrassegnati come Cancellata o No-Show.
 
-* rispetto a SQL, offre capacità di ricerca testuale, aggregazioni analitiche e interrogazioni temporali ad alte prestazioni;
-* rispetto a Neo4j, consente esplorazioni rapide basate su co‑occorrenze, filtri e correlazioni, pur senza la profondità semantica di un grafo nativo.
-  
-L’obiettivo è quindi mostrare come gli stessi dataset — prenotazioni alberghiere e pubblicazioni scientifiche — possano essere indicizzati e interrogati in Elasticsearch per ottenere risposte immediate a domande operative e analitiche, integrando così i punti di forza dei tre paradigmi: relazionale, grafico e documentale.
+## 2. Rete di Pubblicazioni: Database a Grafo (Neo4j)
+### Il problema
+Un dipartimento universitario richiede uno strumento per mappare e navigare la propria produzione scientifica. L'esigenza non si concentra su dati isolati, ma sull'esplorazione profonda e topologica delle connessioni, per far emergere le dinamiche di collaborazione e l'impatto accademico dei paper.
+
+### Perché usare un database a grafo
+Nelle tabelle tradizionali (SQL), per trovare catene di collegamenti servirebbero operazioni di incrocio molto pesanti che rallentano il sistema. Con Neo4j, i dati sono collegati direttamente tra loro tramite frecce (relazioni).
+
+* I Nodi: Autore, Articolo, Tema di ricerca, Venue.
+
+* I Collegamenti: Un autore ha scritto un articolo; un articolo cita un altro articolo; un articolo tratta un tema; un articolo è stato pubblicato in una venue.
+
+### Cosa analizzano le query (Cypher)
+* Analisi Strutturale: rilevamento dei nodi centrali della rete (ricercatori più prolifici e articoli con il più alto tasso di citazione).
+* Catene di Collaborazione: analisi delle reti di co-autoria e tracciamento dei percorsi di citazione diretti e indiretti.
+* Algoritmi Predittivi (Opportunità): identificazione di coppie di autori che pubblicano sulle stesse aree tematiche ma che non hanno mai collaborato a una pubblicazione comune, suggerendo nuove sinergie strategiche per il dipartimento.
+
+## 3. Customer Satisfaction: Analisi dei Feedback (Elasticsearch)
+### Il problema
+Il management alberghiero vuole monitorare la qualità dei servizi analizzando le recensioni testuali (dati non strutturati) lasciate dagli ospiti. L'esigenza critica è l'indicizzazione e la ricerca Full-Text immediata: l'albergatore deve poter individuare istantaneamente, ad esempio, tutti i commenti che parlano di "pulizia" o di "rumore" all'interno di migliaia di testi liberi.
+
+### Scelte Tecniche e Configurazione dell'Indice
+I database normali fanno fatica a cercare parole dentro testi lunghi e liberi. Elasticsearch è un motore di ricerca fatto apposta per questo.
+Le recensioni JSON sono inserite nell'indice recensioni_hotel e mantengono riferimenti speculari (hotel_codice, id_prenotazione) con il database MySQL.
+
+* Indice Invertito ed Elisione Linguistica: L'indice adotta l'analyzer nativo italian. Il motore applica lo stemming (riduzione alla radice semantica del lemma). Di conseguenza, una ricerca sulla parola chiave "pulizia" intercetta automaticamente espressioni naturali come "pulito", "pulite" o "pulitissimo".
+
+### Query analitiche (usage.py)
+Lo script Python gestisce 26 recensioni realistiche (anno 2026) ed esegue quattro query avanzate tramite Elasticsearch DSL:
+* Aggregazione per struttura (terms) e sotto-aggregazione metrica (avg) sul campo punteggio: calcola il rating medio storico di ciascun hotel per tracciare i trend di gradimento del brand.
+* Customer Care: calcola un costrutto booleano che isola i voti insufficienti (inferiori a 2) ed esegue un match testuale sulle parole chiave "personale" o "servizio", notificando real-time i disservizi dello staff.
+* Focus Rumore Estivo: crea un filtro range temporale mirato sul periodo della movida estiva (1° Giugno – 15 Settembre 2026) associato a un match esteso su sinonimi acustici (rumore, rumorosa, caos, caotica, schiamazzi, disturbo, baccano). Ottimizzato con parametri di fuzziness per tollerare refusi di battitura degli utenti.
+* Focus Pulizia Globale: interrogazione full-text destagionalizzata ed estesa a tutto lo storico annuale. Mappa a 360 gradi l'igiene percepita scansionando i termini sia positivi che negativi (pulizia, igiene, sporco, pulito, splendente, polvere).
+
+## Conclusione
+Questo ecosistema dimostra i vantaggi della Polyglot Persistence: la robustezza transazionale di MySQL protegge i dati finanziari e previene gli errori operativi; la flessibilità di Neo4j sblocca la conoscenza nascosta nelle reti complesse; la velocità di Elasticsearch trasforma i testi liberi in metriche di controllo immediate. L'integrazione di questi tre paradigmi offre un'infrastruttura scalabile, resiliente e perfettamente allineata alle necessità strategiche di un'organizzazione moderna.
