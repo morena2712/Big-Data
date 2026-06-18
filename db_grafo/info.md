@@ -1,114 +1,88 @@
-# **Database a Grafo (Neo4j)**
+# Modulo Grafo: Knowledge Graph della Produzione Scientifica (Neo4j)
 
-## **1. Obiettivo del modello**
-Il database a grafo rappresenta un **knowledge graph della produzione scientifica**, progettato per modellare articoli, autori, affiliazioni, venue, topic e relazioni di citazione.  
-L’obiettivo è ottenere una struttura:
+## 1. Obiettivo del Modello
 
-- coerente e priva di duplicati  
-- semanticamente ricca  
-- adatta sia a interrogazioni strutturali sia ad analisi avanzate tramite Graph Data Science  
+Il database basato su grafi è strutturato come un **Knowledge Graph** per mappare e analizzare l'intera produzione scientifica del dipartimento di ricerca. La scelta di questo paradigma supera i limiti strutturali dei database relazionali quando si tratta di navigare connessioni complesse e nidificate (come le catene di citazioni o i flussi di collaborazione).
 
-## **2. Schema concettuale**
-Il grafo è composto da cinque categorie principali di nodi:
+La progettazione punta a ottenere un ecosistema informativo che sia:
 
-- **Article** – titolo, DOI, anno, abstract, numero di citazioni  
-- **Author** – nome, cognome, email, area di ricerca, h-index  
-- **Topic** – nome e descrizione dell’area tematica  
-- **Venue** – nome, tipo (Conference/Journal), impact factor  
-- **Affiliation** – istituzione di appartenenza degli autori  
+* Privo di ridondanze, duplicati o anomalie di aggiornamento.
+* Semanticamente ricco: ogni collegamento esprime una precisa relazione di business ed è dotato di proprietà specifiche.
+   Ottimizzato sia per interrogazioni operative rapide sia per algoritmi complessi di Graph Data Science (GDS).
 
-Le relazioni modellano:
+## 2. Schema Concettuale (Nodi e Relazioni)
 
-- **AUTHORED_BY**: autore di un articolo  
-- **AFFILIATED_WITH**: istituzione dell’autore  
-- **PUBLISHED_IN**: venue di pubblicazione  
-- **COVERS**: topic trattati dall’articolo (con proprietà *relevance*)  
-- **CITES**: citazioni tra articoli (con proprietà *context*)  
-- **CO_AUTHORED**: collaborazione tra autori (derivata)  
+L'architettura del grafo si articola su cinque macro-categorie di nodi, interconnesse da relazioni orientate e tipizzate.
 
-<img width="1600" height="1600" alt="Code_Generated_Image" src="https://github.com/user-attachments/assets/6da4c73b-7ace-472a-a6d6-ea679d15a265" />
+### I Nodi del Sistema
 
-## **3. Interpretazione del grafo**
-Il grafo mostra:
+* Article: Titolo, DOI, Anno, Abstract, Numero di citazioni;
+* Author: Nome, Cognome, Email, Area di ricerca principale, H-Index;
+* Topic: Nome dell'area tematica, Descrizione concettuale;
+* Venue: Nome, Tipologia (Conference / Journal), Impact Factor;
+* Affiliation: Nome dell'istituzione/università di appartenenza
 
-- topic centrali come **Deep Learning**, **Machine Learning**, **Bioinformatics**, **Database Systems**  
-- articoli hub collegati a molti topic e venue  
-- cluster tematici coerenti (es. Deep Learning ↔ Bioinformatics ↔ Nature Methods)  
-- sottoreti legate a Database Systems e Graph Databases (VLDB, SIGMOD)
+### Le Relazioni e le Proprietà di Collegamento
 
-La disposizione spaziale tramite layout a forze rende visibili:
-
-- comunità  
-- sottogruppi tematici  
-- connessioni interdisciplinari  
-
-## **4. Vincoli e qualità dei dati**
-La costruzione del grafo parte dalla definizione di:
-
-- **vincoli di unicità** (email autore, DOI articolo, nome topic, nome venue, nome affiliazione)  
-- **vincoli di esistenza** per proprietà identificative (es. DOI, titolo, email)
-
-Successivamente è stata eseguita una fase di **verifica e pulizia**, che ha incluso:
-
-- ricerca di nodi con proprietà mancanti  
-- eliminazione di relazioni duplicate  
-- rimozione di nodi orfani (topic non trattati, venue senza articoli, affiliazioni senza autori)  
-- ricostruzione corretta delle relazioni CO_AUTHORED  
-
-Questa fase garantisce un grafo consistente e privo di rumore.
+* `(:Author)-[:AUTHORED_BY]->(:Article)` : Associa gli autori alle rispettive pubblicazioni.
+* `(:Author)-[:AFFILIATED_WITH]->(:Affiliation)` : Traccia l'appartenenza accademica dei ricercatori.
+* `(:Article)-[:PUBLISHED_IN]->(:Venue)` : Identifica la sede editoriale del paper.
+* `(:Article)-[:COVERS]->(:Topic)` : Connette l'articolo ai temi trattati. Include la proprietà `relevance` per pesare l'importanza del tema nel testo.
+* `(:Article)-[:CITES]->(:Article)` : Mappa la rete delle citazioni. Include la proprietà `context` per comprendere il ruolo della citazione (es. methodology, foundation, related work).
+* `(:Author)-[:CO_AUTHORED]->(:Author)` : Relazione derivata che unisce i ricercatori che hanno collaborato a un progetto comune.
 
 
-## **5. Popolamento del grafo**
-Il grafo finale contiene:
+## 3. Interpretazione del Grafo e Topologia
 
-- 54 nodi  
-- 121 relazioni
+<img width="1600" height="1600" alt="Code_Generated_Image" src="https://github.com/user-attachments/assets/bc7f6cf3-c329-455d-96db-31f43f2751bf" />
 
-Sono stati creati:
+L'analisi visiva dello spazio del grafo, elaborata tramite un algoritmo di disposizione spaziale (layout a forze), mette in evidenza la struttura organizzativa della conoscenza del dipartimento:
 
-- 10 topic  
-- 10 venue  
-- 10 affiliazioni  
-- 12 autori  
-- 15 articoli  
+* Hub Tematici Centrali: Aree come Deep Learning, Machine Learning, Bioinformatics e Database Systems fungono da grandi attrattori della rete.
+* Articoli Connettori: I paper fondamentali si posizionano al centro del grafo, collegando simultaneamente più aree di ricerca e sedi editoriali diverse.
+* Cluster Interdisciplinari: Sono evidenti aggregazioni naturali e coerenti che superano i confini delle singole materie (ad esempio, l'intersezione netta tra Deep Learning - Bioinformatics - Nature Methods).
+* Sottoreti Verticali: Network più isolati e specialistici descrivono ambiti precisi, come quello relativo ai database d'avanguardia (Database Systems - Graph Databases - VLDB/SIGMOD).
 
-Ogni articolo è collegato a più topic tramite `COVERS`, modellando anche l’interdisciplinarità.  
-Le citazioni includono un attributo *context* per distinguere il ruolo della citazione (es. *methodology*, *foundation*, *related work*).
+## 4. Vincoli di Integrità e Qualità del Dato
 
+Prima della fase di inserimento dei record, sono state implementate regole native per garantire la pulizia del database:
 
-## **6. Analisi strutturali**
-Una volta pulito il grafo, sono state eseguite query per:
+* Vincoli di Unicità: Applicati su `Author(email)`, `Article(DOI)`, `Topic(nome)`, `Venue(nome)` e `Affiliation(nome)` per impedire la nascita di nodi duplicati.
+* Vincoli di Esistenza: Obbligatorietà per le proprietà identificative critiche (es. presenza tassativa di titolo e DOI per gli articoli).
 
-- autori più prolifici  
-- articoli più citati  
-- topic più trattati  
-- venue più attive  
-- coppie di autori che collaborano di più  
-- autori che cambiano tema nel tempo  
-- articoli interdisciplinari  
+### Fase di Refactoring e Pulizia Post-Seed
 
-Queste interrogazioni forniscono una panoramica descrittiva della rete scientifica.
+Successivamente al caricamento dei dati è stata eseguita una query di controllo per eliminare il "rumore" strutturale:
 
+* Individuazione e correzione di nodi con proprietà incomplete.
+*  Fusione o eliminazione di relazioni duplicate sulla stessa coppia di nodi.
+*  Eliminazione automatica di topic non trattati, riviste senza articoli associati o università prive di docenti mappati.
+*  Ricostruzione logica e pulita delle relazioni di co-autoria (`CO_AUTHORED`).
 
-## **7. Analisi avanzate (Graph Data Science)**
-Il grafo è stato proiettato in strutture specifiche per applicare algoritmi GDS:
+## 5. Popolamento e Cardinalità
 
-* **PageRank sulla rete delle citazioni**: identifica gli articoli più influenti considerando sia il numero sia la qualità delle citazioni;
+Metriche: 54 Nodi complessivi e 121 Relazioni attive.
 
-* **PageRank sulla rete di co‑autoria**: misura l’influenza sociale degli autori nella rete delle collaborazioni;
+Ogni articolo è volutamente associato a più temi per testare la capacità del sistema di calcolare l'interdisciplinarità. I collegamenti di citazione (`CITES`), inoltre, sfruttano l'attributo `context` per isolare i paper usati come fondamenta teoriche da quelli citati semplicemente nello stato dell'arte.
 
-* **Louvain (community detection)**: individua gruppi di ricerca e comunità tematiche nella rete di co‑autoria;
+## 6. Query di Analisi Strutturale
 
-* **Label Propagation**: rileva cluster tematici emergenti nella rete delle citazioni, evidenziando strutture latenti.
+Con il database a regime, la suite di interrogazioni in linguaggio Cypher permette di estrarre report descrittivi fondamentali per la governance del dipartimento:
 
+* Classifica dei ricercatori più prolifici e degli articoli con il più alto impatto scientifico.
+* Mappatura dei temi di ricerca più battuti e delle sedi editoriali commercialmente più strategiche.
+* Rilevamento delle coppie di autori con la collaborazione più stretta in termini di volume di paper scritti insieme.
+* Identificazione degli articoli interdisciplinari e dei ricercatori che modificano i propri interessi tematici nel corso della serie storica.
 
-## **8. Conclusione**
-Il knowledge graph realizzato è un ecosistema informativo completo, pulito e coerente, capace di supportare:
+## 7. Analisi Avanzate (Graph Data Science)
 
-- analisi bibliometriche  
-- studio delle collaborazioni  
-- esplorazione tematica  
-- rilevazione di comunità  
-- identificazione di strutture latenti  
+Per estrarre conoscenza latente non visibile tramite semplici query descrittive, il grafo è stato proiettato nel modulo **GDS (Graph Data Science)** per eseguire quattro algoritmi avanzati:
 
-L’integrazione tra modellazione, pulizia dei dati, query analitiche e algoritmi GDS dimostra la solidità del modello e la sua capacità di rappresentare efficacemente la complessità della produzione scientifica.
+* PageRank sulla Rete delle Citazioni: Calcola l'autorevolezza dei paper. Un articolo guadagna un punteggio alto non solo se riceve molte citazioni, ma se viene citato da altri articoli che sono a loro volta nodi autorevoli della rete.
+* PageRank sulla Rete di Co-Autoria: Misura la centralità sociale e accademica dei ricercatori, identificando i profili chiave che fanno da ponte tra i vari laboratori del dipartimento.
+* Algoritmo di Louvain (Community Detection): Analizza la densità dei collegamenti nella rete delle collaborazioni per dividere automaticamente i docenti in gruppi di ricerca interni stabili e comunità di lavoro reali.
+* Label Propagation Algorithm (LPA): Monitora il flusso delle citazioni per intercettare la nascita di cluster tematici emergenti e tendenze scientifiche latenti prima che vengano codificate formalmente dal mercato.
+
+## 8. Conclusione
+
+Il Knowledge Graph realizzato su Neo4j rappresenta una soluzione di alto livello per la gestione della conoscenza accademica. L'integrazione nativa tra la modellazione a grafo, i rigidi vincoli di qualità del dato, le query di analisi in Cypher e gli algoritmi di Graph Data Science fornisce uno strumento strategico in grado di mappare, misurare e prevedere l'evoluzione della produzione scientifica aziendale con performance millisecondate.
